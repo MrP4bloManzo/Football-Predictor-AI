@@ -1,0 +1,7 @@
+name = "football-predictor-ai-sportmonks"
+main = "src/index.js"
+compatibility_date = "2026-11-05"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://mrp4blomanzo.github.io"
