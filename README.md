@@ -84,11 +84,13 @@ Requisitos: Node.js instalado y una cuenta de Cloudflare.
 6. Abre [Football Predictor AI](https://mrp4blomanzo.github.io/Football-Predictor-AI/), selecciona **Sportmonks · Global**, pega esa URL en **URL del proxy** y pulsa **Probar conexión**.
 7. Para el alcance mundial, confirma en MySportmonks que tu plan incluya todas las ligas que deseas consultar.
 
-El Worker acepta peticiones del origen **https://mrp4blomanzo.github.io**, solo expone las rutas necesarias (**/health**, **/fixtures**, **/team-recent**) y utiliza el encabezado **Authorization** al hablar con Sportmonks. El token no se envía al navegador, no se añade a la URL y no forma parte de los archivos del repositorio.
+El Worker acepta peticiones del origen **https://mrp4blomanzo.github.io**, solo expone las rutas necesarias (**/health**, **/fixtures**, **/team-recent**) y utiliza el encabezado **Authorization** al hablar con Sportmonks. La ruta **/health** prueba el token contra el endpoint de ligas; no se limita a verificar que el secreto exista. El token no se envía al navegador, no se añade a la URL y no forma parte de los archivos del repositorio.
+
+El Worker incluye un límite de 60 solicitudes por minuto mediante el binding de Cloudflare. Cloudflare documenta que este mecanismo es aproximado y se aplica por centro de datos, por lo que ayuda a reducir abuso, pero no es un límite global estricto. El valor `namespace_id = "4044042026"` debe ser único dentro de tu cuenta de Cloudflare; cámbialo por otro entero si ya lo utilizas. Esta configuración requiere Wrangler CLI 4.36.0 o posterior.
 
 ### Endurecimiento recomendado
 
-El control CORS restringe el uso desde navegadores de otros sitios, pero CORS no impide por sí solo llamadas directas con herramientas externas. En Cloudflare, configura una regla de rate limiting para el dominio workers.dev del Worker (por ejemplo, un límite inicial de 60 solicitudes por minuto y por IP) y revisa sus métricas. No compartas el token; puedes revocarlo y generar otro desde MySportmonks si crees que quedó expuesto.
+El control CORS restringe el uso desde navegadores de otros sitios, pero CORS no impide por sí solo llamadas directas con herramientas externas. Revisa las métricas de rate limiting de Cloudflare periódicamente y ajusta el umbral si el uso de la aplicación lo exige. No compartas el token; puedes revocarlo y generar otro desde MySportmonks si crees que quedó expuesto.
 
 ### Funcionamiento en el dashboard
 
