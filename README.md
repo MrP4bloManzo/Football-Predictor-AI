@@ -1,42 +1,54 @@
-# Football Predictor AI
+# Football Predictor AI 3.0
 
-Dashboard web en español para consultar eventos de fútbol y explorar pronósticos estadísticos.
+Dashboard web estático en español para consultar partidos y generar estimaciones estadísticas exploratorias.
+
+## Funciones principales
+
+- Consulta de eventos por fecha desde TheSportsDB.
+- Proveedor alternativo API-Football (requiere clave válida).
+- Análisis de últimos resultados con ponderación temporal exponencial.
+- Ajuste conservador de marcadores bajos inspirado en Dixon–Coles.
+- Distribución de marcadores mediante Poisson y mercados derivados:
+  - 1X2 y doble oportunidad.
+  - Over/Under 1.5, 2.5, 3.5 y 4.5 goles.
+  - Ambos equipos anotan sí/no.
+  - Goles de cada equipo.
+- Evaluador manual de cuotas: probabilidad implícita, cuota justa, diferencia de probabilidad y valor esperado.
+- Referencia de Kelly fraccional limitada a un máximo de 1% de banca cuando el usuario introduce una banca.
+- Bitácora local de pronósticos con resultado marcado manualmente, ROI simulado a unidad plana y Brier binario; exportación CSV.
 
 ## Fuentes de datos
 
-- **TheSportsDB (gratis):** utiliza automáticamente la clave pública `123`. No requiere registro. Permite consultar eventos por fecha, con límites de resultados por endpoint.
-- **API-Football:** proveedor alternativo que requiere una clave personal válida enviada en el encabezado `x-apisports-key`. La clave pública de TheSportsDB no funciona en API-Football.
+- **TheSportsDB V1:** usa la clave pública `123`. No requiere registro; la cobertura y el límite de eventos varían por competición y endpoint.
+- **API-Football:** requiere una API Key propia en el encabezado `x-apisports-key`. La clave `123` de TheSportsDB no es válida para API-Football.
 
-Selecciona el proveedor en el panel de conexión del dashboard.
-
-## Funcionalidades
-
-- Consulta de eventos por fechas y filtro local por competición/equipo.
-- Búsqueda de últimos resultados cuando el proveedor los ofrece.
-- Modelo Poisson exploratorio para 1X2, over 2.5 y ambos equipos anotan, únicamente cuando hay muestra suficiente.
-- Dashboard responsive.
+TheSportsDB gratuito no ofrece una fuente completa de cuotas, lesiones, alineaciones ni métricas xG. Por eso, el evaluador de valor espera que el usuario introduzca una cuota decimal real que esté viendo en su casa de apuestas.
 
 ## Uso
 
-1. Abre la página de GitHub Pages o sirve `index.html` desde un servidor local.
-2. Selecciona **TheSportsDB · Gratis, sin registro**.
-3. Pulsa **Probar conexión**.
-4. Selecciona un rango de fechas y pulsa **Cargar partidos**.
+1. Abre [GitHub Pages](https://mrp4blomanzo.github.io/Football-Predictor-AI/).
+2. Selecciona TheSportsDB o API-Football.
+3. Prueba la conexión y carga un rango corto de fechas.
+4. Analiza un partido con suficientes resultados recientes.
+5. En el evaluador, elige un mercado e introduce la cuota decimal.
+6. Guarda la selección en la bitácora y actualiza el resultado una vez finalizado el encuentro.
 
-Para usar API-Football, selecciona ese proveedor e introduce una clave válida obtenida en [API-Football](https://www.api-football.com/).
+## Modelo y limitaciones
 
-## Limitaciones importantes
-
-El plan gratuito de TheSportsDB limita la cantidad de resultados por endpoint y no ofrece el mismo nivel de cobertura que un proveedor de pago. No debe suponerse que se mostrarán todos los partidos de todas las ligas. La versión gratuita tampoco proporciona cuotas de apuestas ni un feed completo de lesiones.
-
-El motor Poisson requiere al menos tres resultados recientes por equipo. Si la fuente no proporciona suficientes partidos, el dashboard muestra que no hay muestra suficiente en vez de inventar probabilidades. Los goles esperados derivados de marcadores no son xG oficiales.
-
-Las probabilidades son estimaciones exploratorias, no garantías de resultados ni recomendaciones de apuesta.
+- Las probabilidades provienen de un modelo Poisson exploratorio con tasas suavizadas hacia priors genéricos y ponderación temporal.
+- Se aplica una corrección de baja anotación inspirada en Dixon–Coles; no es un modelo Dixon–Coles entrenado sobre una liga.
+- El índice de calidad de muestra mide cobertura, cantidad y recencia de datos; **no es precisión predictiva ni confianza estadística calibrada**.
+- No hay modelo de Machine Learning entrenado ni calibración histórica porque el repositorio no contiene un dataset curado y etiquetado para hacerlo responsablemente.
+- Los promedios de goles recientes no son xG oficiales.
+- Las cuotas ingresadas deben estar vigentes y corresponder exactamente al mismo mercado y reglas de liquidación.
+- El EV depende de que la probabilidad estimada sea correcta. Un EV aparente positivo no garantiza rentabilidad.
+- El Kelly indicado es una referencia matemática con techo conservador; no constituye recomendación financiera ni instrucción para apostar.
+- La bitácora se guarda solo en el navegador del usuario. El ROI usa una unidad plana por selección ganada/perdida; las anuladas se excluyen del denominador. Los resultados los marca manualmente el usuario.
 
 ## Seguridad
 
-TheSportsDB V1 utiliza la clave pública `123` en la URL. Para API-Football, esta versión estática usa la clave desde el navegador; no publiques una clave personal ni uses esta configuración para una aplicación pública. Para producción, mueve las peticiones a un backend y almacena secretos en variables de entorno.
+TheSportsDB V1 usa una clave pública en la URL. La versión estática para API-Football usa la clave personal en el navegador; no publiques una clave propia. Para producción, mueve las peticiones a un backend y guarda secretos en variables de entorno.
 
 ## GitHub Pages
 
-El sitio puede publicarse desde **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
+Se publica desde **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
