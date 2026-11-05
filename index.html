@@ -78,9 +78,9 @@
   $('dataProvider').value = 'thesportsdb';
   syncProviderUI();
 
-  function provider(){ return $('dataProvider').value; }
+  function getDataProvider(){ return $('dataProvider').value; }
   function syncProviderUI(){
-    const useTSDB=provider()==='thesportsdb';
+    const useTSDB=getDataProvider()==='thesportsdb';
     $('providerTitle').textContent=useTSDB?'Conexión TheSportsDB':'Conexión API-Football';
     $('apiKeyField').classList.toggle('hidden',useTSDB);
     $('rememberLabel').classList.toggle('hidden',useTSDB);
@@ -143,7 +143,7 @@
   async function testConnection(){
     clearMessage(); $('connectBtn').disabled=true; $('connectBtn').innerHTML='<span class="spinner"></span>Probando';
     try {
-      if(provider()==='thesportsdb'){
+      if(getDataProvider()==='thesportsdb'){
         const data=await tsdb('searchteams.php',{t:'Arsenal'});
         if(!Array.isArray(data.teams)||!data.teams.length)throw new Error('La API respondió, pero no devolvió datos de prueba.');
         setStatus(true,'TheSportsDB conectada');
@@ -153,7 +153,7 @@
         showMessage(`Conexión correcta. Plan: ${data.response?.subscription?.plan || 'consultado'} · Solicitudes restantes hoy: ${data.response?.requests?.remaining ?? 'No informado'}.`);
         if($('rememberKey').checked) localStorage.setItem('fi_api_key',key()); else localStorage.removeItem('fi_api_key');
       }
-    } catch(e){setStatus(false,'Error de conexión');showMessage(e.message+(provider()==='apifootball'?' Verifica que uses una clave de API-Football, no la clave 123 de TheSportsDB.':' Revisa tu conexión a internet o inténtalo nuevamente.'), 'error');}
+    } catch(e){setStatus(false,'Error de conexión');showMessage(e.message+(getDataProvider()==='apifootball'?' Verifica que uses una clave de API-Football, no la clave 123 de TheSportsDB.':' Revisa tu conexión a internet o inténtalo nuevamente.'), 'error');}
     finally{$('connectBtn').disabled=false;$('connectBtn').textContent='Probar conexión';}
   }
   function fixtureStatus(f){ return f.fixture?.status?.short || ''; }
@@ -194,7 +194,7 @@
     if($('dateFrom').value>$('dateTo').value){showMessage('La fecha inicial no puede ser posterior a la fecha final.','error');return;}
     const btn=$('loadBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Cargando partidos';
     try{
-      if(provider()==='thesportsdb'){
+      if(getDataProvider()==='thesportsdb'){
         const dates=dateRangeDays($('dateFrom').value,$('dateTo').value);
         if(dates.length>14)throw new Error('Con TheSportsDB gratuito consulta máximo 14 días por carga para respetar los límites del servicio.');
         const all=[];const failures=[];
@@ -278,7 +278,7 @@
   }
   async function analyzeMatch(id){
     const f=state.fixtures.find(x=>String(x.fixture.id)===String(id)); if(!f)return; state.current=f;
-    if(provider()==='thesportsdb'){await analyzeTSDBMatch(f);return;}
+    if(getDataProvider()==='thesportsdb'){await analyzeTSDBMatch(f);return;}
     $('analysisSection').classList.remove('hidden'); $('analysisTitle').textContent=`${f.teams.home.name} vs ${f.teams.away.name}`;
     $('analysisContent').innerHTML='<div class="panel"><span class="spinner"></span> Consultando forma reciente, predicción, bajas, alineaciones, cuotas e historial…</div>';
     $('analysisSection').scrollIntoView({behavior:'smooth',block:'start'});
