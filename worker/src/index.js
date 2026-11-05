@@ -51,7 +51,9 @@ function statusCode(fixture) {
     INPLAY_1ST_HALF: "1H", INPLAY_2ND_HALF: "2H", INPLAY_ET: "ET",
     EXTRA_TIME: "ET", PEN_LIVE: "P", BREAK: "BT", POSTPONED: "PST",
     POSTP: "PST", CANCELLED: "CANC", CANCL: "CANC",
-    AFTER_EXTRA_TIME: "AET", PENALTIES: "PEN"
+    AFTER_EXTRA_TIME: "AET", PENALTIES: "PEN",
+    FINISHED: "FT", FULL_TIME: "FT", FINISHED_AFTER_EXTRA_TIME: "AET",
+    AFTER_EXTRA: "AET", LIVE: "1H", NOT_STARTED: "NS", NOTSTARTED: "NS"
   };
   if (map[code]) return map[code];
   if (code) return code;
@@ -194,13 +196,29 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(origin) });
     if (request.method !== "GET") return json({ error: "Método no permitido." }, 405, origin);
     const url = new URL(request.url);
-    if (url.pathname === "/health") {
-      return json({ ok: true, provider: "Sportmonks", configured: Boolean(env.SPORTMONKS_TOKEN), version: "1.0.0" }, 200, origin);
-    }
     if (!env.SPORTMONKS_TOKEN) {
       return json({ error: "Falta configurar el secreto SPORTMONKS_TOKEN en Cloudflare." }, 503, origin);
     }
     try {
+      if (url.pathname === "/health") {
+        // Validate the secret against Sportmonks; token presence alone is not enough.
+        const check = await sportmonksGet("/leagues", { per_page: 1, page: 1 }, env);
+        const pagination = paginationOf(check);
+        return json({
+          ok: true,
+          provider: "Sportmonks",
+          configured: true,
+          tokenValid: true,
+          accessibleLeagues: Number(pagination.total || check?.meta?.pagination?.total || 0) || null,
+          version: "1.0.1"
+        }, 200, origin);
+      }
+      if (env.RATE_LIMITER) {
+        // This public single-app site uses one shared key per edge location.
+        // Cloudflare documents these counters as approximate, not global strict quotas.
+        const { success } = await env.RATE_LIMITER.limit({ key: "football-predictor-ai-public" });
+        if (!success) return json({ error: "Límite temporal del proxy alcanzado. Intenta de nuevo en un minuto." }, 429, origin);
+      }
       if (url.pathname === "/fixtures") return json(await getFixtures(url, env), 200, origin);
       if (url.pathname === "/team-recent") return json(await getTeamRecent(url, env), 200, origin);
       return json({ error: "Ruta no encontrada." }, 404, origin);
