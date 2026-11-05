@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b1020" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <title>Football Intelligence · Predictor</title>
   <style>
     :root{--bg:#080d19;--panel:#10192b;--panel2:#131f35;--line:#263650;--text:#edf3ff;--muted:#91a2bd;--green:#40d69a;--blue:#6ba8ff;--yellow:#f4c66a;--red:#ff7885;--radius:18px}
@@ -186,7 +187,7 @@
         <div class="match-foot"><span class="badge">${safe(matchTime(f))}</span><button class="btn small ${canAnalyze?'':'secondary'}" data-analyze="${f.fixture.id}" type="button">${canAnalyze?'Analizar partido':'Ver información'}</button></div>
       </article>`;
     }).join('');
-    root.querySelectorAll('[data-analyze]').forEach(b=>b.addEventListener('click',()=>analyzeMatch(Number(b.dataset.analyze))));
+    root.querySelectorAll('[data-analyze]').forEach(b=>b.addEventListener('click',()=>analyzeMatch(Number(b.dataset.analyze)).catch(err=>{console.error('Error al analizar partido:',err);$('analysisSection').classList.remove('hidden');$('analysisTitle').textContent='No se pudo completar el análisis';$('analysisContent').innerHTML=`<div class="alert error">${safe(err?.message||err||'Error inesperado al analizar el partido.')}</div>`;$('analysisSection').scrollIntoView({behavior:'smooth',block:'start'});})));
   }
   async function loadFixtures(){
     clearMessage(); if(!$('dateFrom').value||!$('dateTo').value){showMessage('Selecciona las dos fechas.','error');return;}
@@ -288,10 +289,10 @@
       cached('/odds',{fixture:id,page:1}), cached('/fixtures/headtohead',{h2h:`${hid}-${aid}`,last:10,timezone:TZ})
     ]);
     const [hr,ar,pred,inj,line,odds,h2h]=requests;
-    const homeRecent=matchesForTeam(hr,hid), awayRecent=matchesForTeam(ar,aid); const model=buildModel(homeRecent,awayRecent); const provider=parsePredictions(pred);
+    const homeRecent=matchesForTeam(hr,hid), awayRecent=matchesForTeam(ar,aid); const model=buildModel(homeRecent,awayRecent); const providerPrediction=parsePredictions(pred);
     state.analyzed++; $('countAnalyzed').textContent=state.analyzed;
     const errors=requests.filter(x=>x?.__error).map(x=>x.__error);
-    $('analysisContent').innerHTML=`<div class="panel"><div class="match-top"><span>${safe(f.league?.name)} · ${safe(f.league?.country)}</span><span>${safe(matchTime(f))}</span></div><div class="detail-grid" style="margin-top:13px">${renderModel(model)}${renderProvider(provider)}${renderRecent(`Forma reciente · ${safe(f.teams.home.name)}`,homeRecent)}${renderRecent(`Forma reciente · ${safe(f.teams.away.name)}`,awayRecent)}${renderInjuries(inj)}${renderLineups(line)}${renderOdds(odds)}${h2hMatches(h2h)}</div>${errors.length?`<div class="alert" style="margin-top:13px">Algunas consultas no estuvieron disponibles: ${safe([...new Set(errors)].join(' · '))}</div>`:''}<p class="note">ID del partido: ${id} · Consultas almacenadas en memoria durante esta sesión para evitar repetir llamadas.</p></div>`;
+    $('analysisContent').innerHTML=`<div class="panel"><div class="match-top"><span>${safe(f.league?.name)} · ${safe(f.league?.country)}</span><span>${safe(matchTime(f))}</span></div><div class="detail-grid" style="margin-top:13px">${renderModel(model)}${renderProvider(providerPrediction)}${renderRecent(`Forma reciente · ${safe(f.teams.home.name)}`,homeRecent)}${renderRecent(`Forma reciente · ${safe(f.teams.away.name)}`,awayRecent)}${renderInjuries(inj)}${renderLineups(line)}${renderOdds(odds)}${h2hMatches(h2h)}</div>${errors.length?`<div class="alert" style="margin-top:13px">Algunas consultas no estuvieron disponibles: ${safe([...new Set(errors)].join(' · '))}</div>`:''}<p class="note">ID del partido: ${id} · Consultas almacenadas en memoria durante esta sesión para evitar repetir llamadas.</p></div>`;
   }
   $('connectBtn').addEventListener('click',testConnection); $('loadBtn').addEventListener('click',loadFixtures);
   $('dataProvider').addEventListener('change',syncProviderUI);
