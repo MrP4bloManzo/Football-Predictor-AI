@@ -52,3 +52,50 @@ TheSportsDB V1 usa una clave pública en la URL. La versión estática para API-
 ## GitHub Pages
 
 Se publica desde **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
+## Integración global con Sportmonks (proxy seguro)
+
+El dashboard incluye un adaptador para **Sportmonks Football API v3**. La web estática de GitHub Pages no almacena ni envía el token del proveedor: las llamadas pasan por un Cloudflare Worker y el token vive como secreto del Worker.
+
+### Alcance global
+
+Sportmonks devuelve los partidos de las ligas habilitadas para la suscripción de tu token. El endpoint de rango de fechas admite hasta 100 días y pagina hasta 50 resultados por página. Para ver cobertura mundial, la suscripción debe incluir las ligas que quieres consultar; el acceso a todas las ligas se contrata con el plan global/Enterprise de Sportmonks. La capa gratuita es de prueba y no habilita todas las competiciones.
+
+- [Sportmonks: crear cuenta y token](https://my.sportmonks.com/api/tokens)
+- [Documentación de fixtures por rango](https://docs.sportmonks.com/v3/endpoints-and-entities/endpoints/fixtures/get-fixtures-by-date-range)
+- [Autenticación oficial](https://docs.sportmonks.com/v3/welcome/authentication)
+- [Planes y cobertura](https://www.sportmonks.com/football-api/plans-pricing/)
+
+### Desplegar el proxy en Cloudflare
+
+Requisitos: Node.js instalado y una cuenta de Cloudflare.
+
+1. Abre una terminal en el repositorio y entra a la carpeta worker.
+2. Inicia sesión: **npx wrangler login**.
+3. Registra el token como secreto (no lo pegues en el HTML ni en GitHub):
+
+       npx wrangler secret put SPORTMONKS_TOKEN
+
+   Pega el token de MySportmonks cuando Wrangler lo solicite.
+4. Despliega:
+
+       npx wrangler deploy
+
+5. Copia la URL HTTPS workers.dev que muestre Wrangler.
+6. Abre [Football Predictor AI](https://mrp4blomanzo.github.io/Football-Predictor-AI/), selecciona **Sportmonks · Global**, pega esa URL en **URL del proxy** y pulsa **Probar conexión**.
+7. Para el alcance mundial, confirma en MySportmonks que tu plan incluya todas las ligas que deseas consultar.
+
+El Worker acepta peticiones del origen **https://mrp4blomanzo.github.io**, solo expone las rutas necesarias (**/health**, **/fixtures**, **/team-recent**) y utiliza el encabezado **Authorization** al hablar con Sportmonks. El token no se envía al navegador, no se añade a la URL y no forma parte de los archivos del repositorio.
+
+### Endurecimiento recomendado
+
+El control CORS restringe el uso desde navegadores de otros sitios, pero CORS no impide por sí solo llamadas directas con herramientas externas. En Cloudflare, configura una regla de rate limiting para el dominio workers.dev del Worker (por ejemplo, un límite inicial de 60 solicitudes por minuto y por IP) y revisa sus métricas. No compartas el token; puedes revocarlo y generar otro desde MySportmonks si crees que quedó expuesto.
+
+### Funcionamiento en el dashboard
+
+- Consulta fixtures de todas las ligas incluidas en la cobertura contratada, con paginación.
+- Rango máximo de 100 días por consulta.
+- Incluye equipos, competición, estado, marcador y estadio cuando Sportmonks los devuelve.
+- El análisis utiliza los últimos resultados finalizados recuperados por equipo y reutiliza el motor probabilístico existente.
+- Lesiones, alineaciones, xG, estadísticas avanzadas y cuotas pueden depender de otros feeds o complementos del plan; el dashboard no inventa esos datos.
+
+La URL pública de GitHub Pages se conserva: https://mrp4blomanzo.github.io/Football-Predictor-AI/
