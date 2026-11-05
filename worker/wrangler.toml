@@ -5,3 +5,12 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://mrp4blomanzo.github.io"
+
+# Cambia namespace_id si este entero ya está utilizado por otro Worker de tu cuenta.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "4044042026"
+
+[ratelimits.simple]
+limit = 60
+period = 60
