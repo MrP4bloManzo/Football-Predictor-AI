@@ -285,7 +285,7 @@
     };
     const pct={};Object.entries(probs).forEach(([k,v])=>pct[k]=probabilityPct(v));
     const best=[...grid].sort((x,y)=>y.p-x.p).slice(0,5);
-    const recencyDate=arr=>arr.length?new Date(Math.max(...arr.map(x=>new Date(x.date).getTime()).filter(Number.isFinite))):null;
+    const recencyDate=arr=>{const dates=arr.map(x=>new Date(x.date).getTime()).filter(Number.isFinite);return dates.length?new Date(Math.max(...dates)):null;};
     const lastHome=recencyDate(home),lastAway=recencyDate(away);
     const ageDays=d=>d?Math.max(0,(Date.now()-d.getTime())/86400000):60;
     const freshness=Math.max(0,1-Math.max(ageDays(lastHome),ageDays(lastAway))/45);
@@ -395,7 +395,7 @@
     const settled=state.ledger.filter(x=>['won','lost','void'].includes(x.result));
     const wins=settled.filter(x=>x.result==='won').length,losses=settled.filter(x=>x.result==='lost').length,voids=settled.filter(x=>x.result==='void').length;
     const profit=state.ledger.reduce((s,x)=>s+(x.result==='won'?(x.odds-1):x.result==='lost'?-1:0),0);
-    const roi=settled.length?(profit/settled.length)*100:0;
+    const graded=state.ledger.filter(x=>x.result==='won'||x.result==='lost');const roi=graded.length?(profit/graded.length)*100:0;
     const brier=settled.filter(x=>x.result!=='void').length?settled.filter(x=>x.result!=='void').reduce((s,x)=>s+Math.pow(x.probability-(x.result==='won'?1:0),2),0)/settled.filter(x=>x.result!=='void').length:null;
     summary.innerHTML=`<div class="ledger-stats">
       <div class="ledger-stat"><b>${state.ledger.length}</b><span>Pronósticos guardados</span></div>
