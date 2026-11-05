@@ -28,8 +28,9 @@
     </div>
     <div class="panel api-box">
       <h3 id="providerTitle">Conexión TheSportsDB</h3>
-      <div class="field"><label for="dataProvider">FUENTE DE DATOS</label><select id="dataProvider"><option value="thesportsdb">TheSportsDB · Gratis, sin registro</option><option value="apifootball">API-Football · Requiere API Key</option></select></div>
+      <div class="field"><label for="dataProvider">FUENTE DE DATOS</label><select id="dataProvider"><option value="sportmonks">Sportmonks · Global (requiere proxy)</option><option value="thesportsdb">TheSportsDB · Gratis, cobertura limitada</option><option value="apifootball">API-Football · Requiere API Key</option></select></div>
       <div id="apiKeyField" class="field hidden" style="margin-top:10px"><label for="apiKey">API KEY (x-apisports-key)</label><div class="key-row"><input id="apiKey" type="password" autocomplete="off" placeholder="Pega aquí tu API key de API-Football"/><button id="toggleKey" class="btn secondary small" type="button">Ver</button></div></div>
+      <div id="sportmonksField" class="field hidden" style="margin-top:10px"><label for="sportmonksWorkerUrl">URL DEL PROXY CLOUDFLARE WORKER</label><input id="sportmonksWorkerUrl" type="url" autocomplete="off" placeholder="https://football-predictor-ai-sportmonks.tu-cuenta.workers.dev"/></div>
       <div style="display:flex;gap:9px;align-items:center;margin-top:10px;flex-wrap:wrap"><button id="connectBtn" class="btn small" type="button">Probar conexión</button><label id="rememberLabel" class="hidden" style="font-size:10px;color:var(--muted);display:flex;gap:6px;align-items:center"><input id="rememberKey" type="checkbox"/> Recordar en este navegador</label></div>
       <p id="providerNote" class="note">TheSportsDB usa la clave pública gratuita 123 automáticamente. No necesitas pegar ninguna clave.</p>
       <div class="note"><a id="providerDocs" class="link" href="https://www.thesportsdb.com/documentation" target="_blank" rel="noopener">Documentación oficial ↗</a></div>
@@ -53,7 +54,8 @@
   </section>
 
   <div class="section-head"><h3>Partidos encontrados</h3><span id="resultsLabel" class="muted" style="font-size:11px">Conecta tu API y carga un rango de fechas</span></div>
-  <section id="matches" class="matches"><div class="empty">Añade tu API key y pulsa <b>Probar conexión</b>. Después carga los partidos de las fechas que quieras.</div></section>
+  <section id="matches" class="matches"><div class="empty">Configura el proveedor y pulsa <b>Probar conexión</b>. Después carga los partidos del rango elegido.</div></section>
+  <div id="pagination" class="section-head hidden"><span id="pageInfo" class="muted" style="font-size:11px"></span><div style="display:flex;gap:8px"><button id="prevPage" class="btn secondary small" type="button">Anterior</button><button id="nextPage" class="btn secondary small" type="button">Siguiente</button></div></div>
 
   <section id="analysisSection" class="detail hidden">
     <div class="section-head"><h3 id="analysisTitle">Análisis del encuentro</h3><button id="closeAnalysis" class="btn secondary small" type="button">Cerrar análisis</button></div>
@@ -73,28 +75,36 @@
   const TSDB_BASE = 'https://www.thesportsdb.com/api/v1/json/123';
   const TZ = 'America/Mexico_City';
   const $ = (id) => document.getElementById(id);
-  const state = { fixtures: [], analyzed: 0, cache: new Map(), current: null, currentModel: null, currentBet: null, ledger: loadLedger() };
+  const state = { fixtures: [], analyzed: 0, cache: new Map(), current: null, currentModel: null, currentBet: null, ledger: loadLedger(), page: 1, pagination: null };
   const today = new Date();
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   $('dateFrom').value = iso(today);
   const plus7 = new Date(today); plus7.setDate(today.getDate()+7); $('dateTo').value = iso(plus7);
   $('clock').textContent = new Intl.DateTimeFormat('es-MX',{timeZone:TZ,dateStyle:'medium'}).format(new Date());
   if (localStorage.getItem('fi_api_key')) { $('apiKey').value = localStorage.getItem('fi_api_key'); $('rememberKey').checked = true; }
-  $('dataProvider').value = 'thesportsdb';
+  $('sportmonksWorkerUrl').value = localStorage.getItem('fi_sportmonks_worker_url') || '';
+  $('dataProvider').value = 'sportmonks';
   syncProviderUI();
 
   function getDataProvider(){ return $('dataProvider').value; }
   function syncProviderUI(){
-    const useTSDB=getDataProvider()==='thesportsdb';
-    $('providerTitle').textContent=useTSDB?'Conexión TheSportsDB':'Conexión API-Football';
-    $('apiKeyField').classList.toggle('hidden',useTSDB);
-    $('rememberLabel').classList.toggle('hidden',useTSDB);
-    $('providerNote').textContent=useTSDB
-      ?'TheSportsDB usa la clave pública gratuita 123 automáticamente. Sin registro. El plan gratuito limita resultados por endpoint y no ofrece cuotas ni lesiones completas.'
-      :'Introduce tu clave personal de API-Football. Debe ser una x-apisports-key válida; la clave 123 de TheSportsDB no funciona aquí.';
-    $('providerDocs').href=useTSDB?'https://www.thesportsdb.com/documentation':'https://www.api-football.com/documentation-v3';
-    $('providerDocs').textContent=useTSDB?'Documentación TheSportsDB ↗':'Documentación API-Football ↗';
-    setStatus(false,useTSDB?'TheSportsDB sin probar':'API-Football sin conectar');
+    const provider=getDataProvider();
+    const useTSDB=provider==='thesportsdb';
+    const useSportmonks=provider==='sportmonks';
+    $('providerTitle').textContent=useSportmonks?'Conexión Sportmonks Global':useTSDB?'Conexión TheSportsDB':'Conexión API-Football';
+    $('apiKeyField').classList.toggle('hidden',useTSDB||useSportmonks);
+    $('rememberLabel').classList.toggle('hidden',useTSDB||useSportmonks);
+    $('sportmonksField').classList.toggle('hidden',!useSportmonks);
+    $('providerNote').textContent=useSportmonks
+      ?'El token Sportmonks se guarda únicamente como secreto en Cloudflare Worker. Pega aquí la URL pública del proxy; no introduzcas el token en esta página. La cobertura depende de las ligas incluidas en tu plan.'
+      :useTSDB
+        ?'TheSportsDB usa la clave pública gratuita 123 automáticamente. Sin registro. El plan gratuito limita resultados por endpoint y no ofrece cuotas ni lesiones completas.'
+        :'Introduce tu clave personal de API-Football. Debe ser una x-apisports-key válida; la clave 123 de TheSportsDB no funciona aquí.';
+    $('providerDocs').href=useSportmonks?'https://docs.sportmonks.com/v3/':useTSDB?'https://www.thesportsdb.com/documentation':'https://www.api-football.com/documentation-v3';
+    $('providerDocs').textContent=useSportmonks?'Documentación Sportmonks ↗':useTSDB?'Documentación TheSportsDB ↗':'Documentación API-Football ↗';
+    $('pagination').classList.add('hidden');
+    state.pagination=null;state.page=1;
+    setStatus(false,useSportmonks?'Sportmonks pendiente de configurar':useTSDB?'TheSportsDB sin probar':'API-Football sin conectar');
   }
   async function tsdb(path,params={}){
     const u=new URL(TSDB_BASE+'/'+path);
@@ -135,6 +145,34 @@
   function showMessage(text, type='') { const el=$('message'); el.textContent=text; el.className='alert'+(type==='error'?' error':''); el.classList.remove('hidden'); }
   function clearMessage(){ $('message').classList.add('hidden'); }
   function key(){ return $('apiKey').value.trim(); }
+  function getSportmonksWorkerUrl(){
+    let raw=$('sportmonksWorkerUrl').value.trim();
+    while(raw.endsWith('/'))raw=raw.slice(0,-1);
+    if(!raw)throw new Error('Pega la URL del Cloudflare Worker. Primero despliega la carpeta worker y guarda SPORTMONKS_TOKEN como secreto.');
+    let parsed;try{parsed=new URL(raw);}catch{throw new Error('La URL del proxy no es válida.');}
+    if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||parsed.pathname!=='/'){
+      throw new Error('Usa la URL HTTPS raíz del Worker, sin usuario, ruta, parámetros ni fragmentos.');
+    }
+    return parsed.origin;
+  }
+  async function sportmonksRequest(path,params={}){
+    const base=getSportmonksWorkerUrl();
+    const url=new URL(base+path);
+    Object.entries(params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')url.searchParams.set(k,String(v));});
+    const response=await fetch(url,{headers:{'Accept':'application/json'}});
+    let data;try{data=await response.json();}catch{throw new Error('El proxy devolvió una respuesta que no es JSON.');}
+    if(!response.ok)throw new Error(data?.error||'Error HTTP '+response.status+' en el proxy Sportmonks.');
+    return data;
+  }
+  function updatePagination(){
+    const panel=$('pagination'),p=state.pagination;
+    if(getDataProvider()!=='sportmonks'||!p){panel.classList.add('hidden');return;}
+    panel.classList.remove('hidden');
+    const page=Number(p.current_page||state.page),total=Number(p.total||0),pages=Number(p.total_pages||0);
+    $('pageInfo').textContent=total?('Página '+page+(pages?' de '+pages:'')+' · '+total.toLocaleString('es-MX')+' partidos disponibles en el rango'):'Página '+page+' · '+state.fixtures.length+' partidos';
+    $('prevPage').disabled=page<=1;
+    $('nextPage').disabled=p.has_more===false||(pages>0&&page>=pages);
+  }
   async function api(path, params={}) {
     if (!key()) throw new Error('Primero pega tu API key de API-Football.');
     const u = new URL(API_BASE + path);
@@ -148,7 +186,13 @@
   async function testConnection(){
     clearMessage(); $('connectBtn').disabled=true; $('connectBtn').innerHTML='<span class="spinner"></span>Probando';
     try {
-      if(getDataProvider()==='thesportsdb'){
+      if(getDataProvider()==='sportmonks'){
+        const data=await sportmonksRequest('/health');
+        if(!data.ok||!data.configured)throw new Error('El Worker responde, pero no encuentra el secreto SPORTMONKS_TOKEN. Ejecuta npx wrangler secret put SPORTMONKS_TOKEN y vuelve a desplegar.');
+        localStorage.setItem('fi_sportmonks_worker_url',getSportmonksWorkerUrl());
+        setStatus(true,'Sportmonks conectada · proxy seguro');
+        showMessage('Conexión correcta. El navegador habla con Cloudflare Worker; el token permanece del lado del servidor. Cobertura global según las ligas habilitadas en tu plan.');
+      } else if(getDataProvider()==='thesportsdb') {
         const data=await tsdb('searchteams.php',{t:'Arsenal'});
         if(!Array.isArray(data.teams)||!data.teams.length)throw new Error('La API respondió, pero no devolvió datos de prueba.');
         setStatus(true,'TheSportsDB conectada');
@@ -158,8 +202,10 @@
         showMessage(`Conexión correcta. Plan: ${data.response?.subscription?.plan || 'consultado'} · Solicitudes restantes hoy: ${data.response?.requests?.remaining ?? 'No informado'}.`);
         if($('rememberKey').checked) localStorage.setItem('fi_api_key',key()); else localStorage.removeItem('fi_api_key');
       }
-    } catch(e){setStatus(false,'Error de conexión');showMessage(e.message+(getDataProvider()==='apifootball'?' Verifica que uses una clave de API-Football, no la clave 123 de TheSportsDB.':' Revisa tu conexión a internet o inténtalo nuevamente.'), 'error');}
-    finally{$('connectBtn').disabled=false;$('connectBtn').textContent='Probar conexión';}
+    } catch(e){
+      setStatus(false,'Error de conexión');
+      showMessage(e.message+(getDataProvider()==='apifootball'?' Verifica que uses una clave de API-Football, no la clave 123 de TheSportsDB.':' Revisa la URL del proxy, el secreto y la configuración CORS.'), 'error');
+    } finally{$('connectBtn').disabled=false;$('connectBtn').textContent='Probar conexión';}
   }
   function fixtureStatus(f){ return f.fixture?.status?.short || ''; }
   function statusLabel(s){ if(['NS','TBD','PST'].includes(s))return 'Por jugar'; if(['1H','HT','2H','ET','BT','P','LIVE'].includes(s))return 'En vivo'; if(['FT','AET','PEN'].includes(s))return 'Finalizado'; return s || 'Sin estado'; }
@@ -194,12 +240,21 @@
     }).join('');
     root.querySelectorAll('[data-analyze]').forEach(b=>b.addEventListener('click',()=>analyzeMatch(Number(b.dataset.analyze)).catch(err=>{console.error('Error al analizar partido:',err);$('analysisSection').classList.remove('hidden');$('analysisTitle').textContent='No se pudo completar el análisis';$('analysisContent').innerHTML=`<div class="alert error">${safe(err?.message||err||'Error inesperado al analizar el partido.')}</div>`;$('analysisSection').scrollIntoView({behavior:'smooth',block:'start'});})));
   }
-  async function loadFixtures(){
+  async function loadFixtures(pageNumber=1){
     clearMessage(); if(!$('dateFrom').value||!$('dateTo').value){showMessage('Selecciona las dos fechas.','error');return;}
     if($('dateFrom').value>$('dateTo').value){showMessage('La fecha inicial no puede ser posterior a la fecha final.','error');return;}
     const btn=$('loadBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Cargando partidos';
     try{
-      if(getDataProvider()==='thesportsdb'){
+      if(getDataProvider()==='sportmonks'){
+        const days=dateRangeDays($('dateFrom').value,$('dateTo').value);
+        if(days.length>100)throw new Error('Sportmonks admite rangos de máximo 100 días por consulta.');
+        const data=await sportmonksRequest('/fixtures',{from:$('dateFrom').value,to:$('dateTo').value,page:pageNumber,per_page:50});
+        state.fixtures=data.data||[];state.pagination=data.pagination||{current_page:pageNumber,per_page:50,has_more:false};state.page=pageNumber;
+        renderMatches();updatePagination();setStatus(true,'Sportmonks conectada · cobertura de suscripción');
+        const p=state.pagination,total=Number(p.total||0);
+        showMessage('Sportmonks devolvió '+state.fixtures.length+' partidos en la página '+pageNumber+'.'+(total?' Total en el rango: '+total+'.':'')+' La disponibilidad mundial depende de las ligas contratadas.');
+      } else if(getDataProvider()==='thesportsdb'){
+        $('pagination').classList.add('hidden');state.pagination=null;state.page=1;
         const dates=dateRangeDays($('dateFrom').value,$('dateTo').value);
         if(dates.length>14)throw new Error('Con TheSportsDB gratuito consulta máximo 14 días por carga para respetar los límites del servicio.');
         const all=[];const failures=[];
@@ -213,6 +268,7 @@
         const note=`TheSportsDB devolvió ${state.fixtures.length} eventos para ${dates.length} días. El plan gratuito limita la cantidad de eventos por fecha; puede no incluir todos los partidos de cada liga.`;
         showMessage(failures.length?`${note} Incidencias: ${failures.slice(0,2).join(' · ')}`:note,failures.length?'error':'');
       } else {
+        $('pagination').classList.add('hidden');state.pagination=null;state.page=1;
         const data=await api('/fixtures',{from:$('dateFrom').value,to:$('dateTo').value,timezone:TZ});
         state.fixtures=data.response||[]; renderMatches(); setStatus(true,'API-Football conectada');
         showMessage(`Se recibieron ${state.fixtures.length} partidos. Algunas competiciones o estadísticas pueden no estar incluidas en tu plan.`);
@@ -432,6 +488,26 @@
   function renderLineups(obj){const arr=obj?.response||[];return `<div class="subpanel"><h4>Alineaciones</h4>${arr.length?arr.map(x=>`<div style="margin-bottom:10px"><b>${safe(x.team?.name)}</b> · ${safe(x.formation||'Formación no disponible')}<div class="note">Entrenador: ${safe(x.coach?.name||'No informado')} · Titulares: ${(x.startXI||[]).length}</div><div>${(x.startXI||[]).slice(0,11).map(p=>`<span class="pill">${safe(p.player?.name)}</span>`).join('')}</div></div>`).join(''):'<span class="muted">Aún no publicadas o no disponibles para esta competición. Suelen aparecer cerca del inicio del partido.</span>'}</div>`;}
   function renderOdds(obj){const arr=obj?.response||[];if(!arr.length)return '<div class="subpanel"><h4>Cuotas</h4><span class="muted">No se devolvieron cuotas para este partido o tu plan no las incluye.</span></div>';return `<div class="subpanel"><h4>Cuotas disponibles</h4><div class="list">${arr.slice(0,5).map(book=>`<div><b>${safe(book.bookmaker?.name||'Casa de apuestas')}</b>${(book.bets||[]).slice(0,5).map(b=>`<div class="list-item"><span>${safe(b.name)}</span><span>${(b.values||[]).slice(0,8).map(v=>`${safe(v.value)}: <b>${safe(v.odd)}</b>`).join(' · ')}</span></div>`).join('')}</div>`).join('')}</div></div>`;}
   function h2hMatches(obj){const arr=obj?.response||[];return `<div class="subpanel"><h4>Enfrentamientos directos (${arr.length})</h4>${arr.length?`<div class="list">${arr.slice(0,8).map(f=>`<div class="list-item"><span>${safe(new Date(f.fixture.date).toLocaleDateString('es-MX',{timeZone:TZ}))} · ${safe(f.teams.home.name)} vs ${safe(f.teams.away.name)}</span><b>${safe(f.goals.home)} - ${safe(f.goals.away)}</b></div>`).join('')}</div>`:'<span class="muted">Sin enfrentamientos devueltos.</span>'}</div>`;}
+  async function analyzeSportmonksMatch(f){
+    $('analysisSection').classList.remove('hidden');
+    $('analysisTitle').textContent=f.teams.home.name+' vs '+f.teams.away.name;
+    $('analysisContent').innerHTML='<div class="panel"><span class="spinner"></span> Consultando el historial global de ambos equipos…</div>';
+    $('analysisSection').scrollIntoView({behavior:'smooth',block:'start'});
+    const before=String(f.fixture.date||'').slice(0,10);
+    const [homeData,awayData]=await Promise.all([
+      sportmonksRequest('/team-recent',{team_id:f.teams.home.id,before,limit:10}),
+      sportmonksRequest('/team-recent',{team_id:f.teams.away.id,before,limit:10})
+    ]);
+    const homeRecent=matchesForTeam(homeData,f.teams.home.id);
+    const awayRecent=matchesForTeam(awayData,f.teams.away.id);
+    const model=buildModel(homeRecent,awayRecent);state.currentModel=model;
+    state.analyzed++;$('countAnalyzed').textContent=state.analyzed;
+    const venue=f.fixture.venue?.name||'No informado';
+    const details=`<div class="subpanel"><h4>Información del encuentro</h4><div class="rows"><div class="data-row"><span>Competición</span><b>${safe(f.league.name)}</b></div><div class="data-row"><span>País</span><b>${safe(f.league.country||'Cobertura global')}</b></div><div class="data-row"><span>Fecha</span><b>${safe(matchTime(f))}</b></div><div class="data-row"><span>Estadio</span><b>${safe(venue)}</b></div><div class="data-row"><span>Estado</span><b>${safe(statusLabel(fixtureStatus(f)))}</b></div></div></div>`;
+    const coverage=`<div class="subpanel"><h4>Alcance de datos Sportmonks</h4><span class="muted">Este análisis utiliza los últimos resultados finalizados que tu suscripción permite consultar. Lesiones, alineaciones, xG, estadísticas avanzadas y cuotas pueden depender de feeds o complementos del plan; no se inventan cuando no están disponibles. La cobertura global no significa que cada liga del mundo esté habilitada en cualquier suscripción.</span></div>`;
+    $('analysisContent').innerHTML=`<div class="panel"><div class="match-top"><span>${safe(f.league.name)} · ${safe(f.league.country||'Global')}</span><span>${safe(matchTime(f))}</span></div><div class="detail-grid" style="margin-top:13px">${details}${renderModel(model)}${renderBetEvaluator(model)}${renderRecent('Forma reciente · '+safe(f.teams.home.name),homeRecent)}${renderRecent('Forma reciente · '+safe(f.teams.away.name),awayRecent)}${coverage}</div><p class="note">Fuente: Sportmonks Football API v3 · datos accesibles en la suscripción activa.</p></div>`;
+    bindBetEvaluator();
+  }
   async function analyzeTSDBMatch(f){
     $('analysisSection').classList.remove('hidden');$('analysisTitle').textContent=`${f.teams.home.name} vs ${f.teams.away.name}`;
     $('analysisContent').innerHTML='<div class="panel"><span class="spinner"></span> Consultando los datos disponibles…</div>';
@@ -450,6 +526,7 @@
   }
   async function analyzeMatch(id){
     const f=state.fixtures.find(x=>String(x.fixture.id)===String(id)); if(!f)return; state.current=f;
+    if(getDataProvider()==='sportmonks'){await analyzeSportmonksMatch(f);return;}
     if(getDataProvider()==='thesportsdb'){await analyzeTSDBMatch(f);return;}
     $('analysisSection').classList.remove('hidden'); $('analysisTitle').textContent=`${f.teams.home.name} vs ${f.teams.away.name}`;
     $('analysisContent').innerHTML='<div class="panel"><span class="spinner"></span> Consultando forma reciente, predicción, bajas, alineaciones, cuotas e historial…</div>';
@@ -466,7 +543,10 @@
     const errors=requests.filter(x=>x?.__error).map(x=>x.__error);
     $('analysisContent').innerHTML=`<div class="panel"><div class="match-top"><span>${safe(f.league?.name)} · ${safe(f.league?.country)}</span><span>${safe(matchTime(f))}</span></div><div class="detail-grid" style="margin-top:13px">${renderModel(model)}${renderBetEvaluator(model)}${renderProvider(providerPrediction)}${renderRecent(`Forma reciente · ${safe(f.teams.home.name)}`,homeRecent)}${renderRecent(`Forma reciente · ${safe(f.teams.away.name)}`,awayRecent)}${renderInjuries(inj)}${renderLineups(line)}${renderOdds(odds)}${h2hMatches(h2h)}</div>${errors.length?`<div class="alert" style="margin-top:13px">Algunas consultas no estuvieron disponibles: ${safe([...new Set(errors)].join(' · '))}</div>`:''}<p class="note">ID del partido: ${id} · Consultas almacenadas en memoria durante esta sesión para evitar repetir llamadas.</p></div>`;bindBetEvaluator();
   }
-  $('connectBtn').addEventListener('click',testConnection); $('loadBtn').addEventListener('click',loadFixtures);
+  $('connectBtn').addEventListener('click',testConnection); $('loadBtn').addEventListener('click',()=>loadFixtures(1));
+  $('prevPage').addEventListener('click',()=>{if(state.page>1)loadFixtures(state.page-1);});
+  $('nextPage').addEventListener('click',()=>{if(state.pagination?.has_more!==false)loadFixtures(state.page+1);});
+  $('sportmonksWorkerUrl').addEventListener('change',()=>{try{localStorage.setItem('fi_sportmonks_worker_url',getSportmonksWorkerUrl());}catch(e){localStorage.removeItem('fi_sportmonks_worker_url');}});
   $('exportLedger').addEventListener('click',exportLedger);renderLedger();
   $('dataProvider').addEventListener('change',syncProviderUI);
   $('searchLeague').addEventListener('input',renderMatches); $('statusFilter').addEventListener('change',renderMatches);
