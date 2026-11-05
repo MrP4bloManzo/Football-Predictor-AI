@@ -200,6 +200,12 @@ export default {
       return json({ error: "Falta configurar el secreto SPORTMONKS_TOKEN en Cloudflare." }, 503, origin);
     }
     try {
+      if (env.RATE_LIMITER) {
+        // Include /health because it also makes a billable upstream validation call.
+        // Cloudflare documents these counters as approximate, not global strict quotas.
+        const { success } = await env.RATE_LIMITER.limit({ key: "football-predictor-ai-public" });
+        if (!success) return json({ error: "Límite temporal del proxy alcanzado. Intenta de nuevo en un minuto." }, 429, origin);
+      }
       if (url.pathname === "/health") {
         // Validate the secret against Sportmonks; token presence alone is not enough.
         const check = await sportmonksGet("/leagues", { per_page: 1, page: 1 }, env);
@@ -212,12 +218,6 @@ export default {
           accessibleLeagues: Number(pagination.total || check?.meta?.pagination?.total || 0) || null,
           version: "1.0.1"
         }, 200, origin);
-      }
-      if (env.RATE_LIMITER) {
-        // This public single-app site uses one shared key per edge location.
-        // Cloudflare documents these counters as approximate, not global strict quotas.
-        const { success } = await env.RATE_LIMITER.limit({ key: "football-predictor-ai-public" });
-        if (!success) return json({ error: "Límite temporal del proxy alcanzado. Intenta de nuevo en un minuto." }, 429, origin);
       }
       if (url.pathname === "/fixtures") return json(await getFixtures(url, env), 200, origin);
       if (url.pathname === "/team-recent") return json(await getTeamRecent(url, env), 200, origin);
