@@ -1,1 +1,211 @@
-<!-- Placeholder will be replaced after transferring the HTML source -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>Football Intelligence · Predictor</title>
+  <style>
+    :root{--bg:#080d19;--panel:#10192b;--panel2:#131f35;--line:#263650;--text:#edf3ff;--muted:#91a2bd;--green:#40d69a;--blue:#6ba8ff;--yellow:#f4c66a;--red:#ff7885;--radius:18px}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 10% -10%,#162b48 0%,transparent 60%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    button,input,select{font:inherit}button{cursor:pointer}.wrap{max-width:1380px;margin:auto;padding:28px 22px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:13px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#40d69a,#4c89ff);display:grid;place-items:center;color:#06121a;font-size:22px;font-weight:900;box-shadow:0 8px 28px #2c9d8a35}.eyebrow{color:var(--green);font-size:10px;letter-spacing:2px;font-weight:800}.brand h1{font-size:20px;margin:1px 0 0;letter-spacing:.3px}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#70819b}.dot.on{background:var(--green);box-shadow:0 0 12px #40d69a88}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin-bottom:16px}.panel{background:linear-gradient(180deg,#111c30,#0e1728);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 12px 40px #0002}.hero h2{font-size:25px;line-height:1.15;margin:8px 0}.hero p{color:var(--muted);max-width:680px;margin:8px 0 0}.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid #315345;background:#102a28;color:#8deac4;padding:5px 9px;border-radius:99px;font-size:10px;font-weight:750;letter-spacing:.6px}.api-box h3,.section-head h3{margin:0 0 13px;font-size:15px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:11px;color:var(--muted);font-weight:700}.field input,.field select{width:100%;background:#091323;color:var(--text);border:1px solid #30415d;border-radius:10px;padding:11px 12px;outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #6ba8ff18}.key-row{display:flex;gap:8px}.key-row input{flex:1;min-width:0}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:800;background:var(--green);color:#061a17;transition:.15s}.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}.btn.secondary{background:#1a2b45;color:#dce8fa;border:1px solid #344967}.btn.small{padding:8px 11px;font-size:12px}.note{font-size:11px;color:var(--muted);margin:9px 0 0}.toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:10px;align-items:end;margin:16px 0}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.metric{padding:15px 16px;background:#101a2d;border:1px solid var(--line);border-radius:14px}.metric .label{color:var(--muted);font-size:11px}.metric .value{font-size:24px;font-weight:850;margin-top:3px}.metric .sub{font-size:10px;color:var(--muted)}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 12px}.section-head h3{margin:0}.muted{color:var(--muted)}.matches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.match{border:1px solid var(--line);background:linear-gradient(150deg,#121f34,#0d1728);border-radius:15px;padding:15px;min-width:0}.match-top{display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--muted);font-size:10px}.league{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}.match-teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin:17px 0}.team{display:flex;align-items:center;gap:9px;min-width:0;font-weight:750}.team.away{justify-content:flex-end;text-align:right}.team img{height:30px;width:30px;object-fit:contain}.team span{overflow:hidden;text-overflow:ellipsis}.vs{color:#60738f;font-weight:900;font-size:10px}.match-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}.badge{font-size:10px;padding:5px 8px;border-radius:7px;background:#1c2c46;color:#b9cce8}.empty{grid-column:1/-1;text-align:center;padding:35px;color:var(--muted);border:1px dashed #34445d;border-radius:15px}.alert{margin:12px 0;padding:12px 14px;border-radius:11px;background:#2b2117;border:1px solid #6b4d25;color:#ffdda0;font-size:12px}.error{background:#2b1820;border-color:#6c3443;color:#ffb9c1}.detail{margin-top:18px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.subpanel{background:#0b1526;border:1px solid #253650;border-radius:13px;padding:15px;min-width:0}.subpanel h4{font-size:12px;margin:0 0 12px}.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.prob{background:#14243b;border-radius:10px;padding:12px 7px;text-align:center}.prob strong{font-size:22px;display:block}.prob span{font-size:10px;color:var(--muted)}.bar{height:7px;background:#263650;border-radius:99px;overflow:hidden;margin-top:7px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#7ee4bd);border-radius:99px}.rows{display:grid;gap:8px}.data-row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #1e2d44;padding-bottom:7px;font-size:11px}.data-row:last-child{border:0;padding:0}.data-row b{text-align:right}.form-dots{display:flex;gap:5px}.form-dot{height:23px;width:23px;border-radius:7px;display:grid;place-items:center;font-size:10px;font-weight:900}.W{background:#123e35;color:#80e9bd}.D{background:#46381e;color:#f5d27e}.L{background:#49252e;color:#ff9ba6}.pill{display:inline-block;padding:4px 7px;border-radius:7px;background:#1b2c44;color:#c8d8ef;font-size:10px;margin:2px}.list{display:grid;gap:8px;max-height:250px;overflow:auto}.list-item{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;padding-bottom:8px;border-bottom:1px solid #1e2d44}.list-item:last-child{border:0}.spinner{display:inline-block;width:13px;height:13px;border:2px solid #ffffff40;border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}.footer{margin-top:25px;color:#7486a2;font-size:10px;text-align:center}.hidden{display:none!important}.mono{font-variant-numeric:tabular-nums}.link{color:#8fbaff;text-decoration:none}.link:hover{text-decoration:underline}
+    @media(max-width:900px){.hero{grid-template-columns:1fr}.toolbar{grid-template-columns:repeat(2,1fr)}.toolbar .btn{grid-column:1/-1}.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.wrap{padding:18px 12px 40px}.top{align-items:flex-start;flex-direction:column}.matches{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.toolbar{grid-template-columns:1fr 1fr}.hero h2{font-size:22px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">⚽</div><div><div class="eyebrow">MATCH ANALYTICS ENGINE</div><h1>FOOTBALL INTELLIGENCE</h1></div></div>
+    <div class="status"><span id="apiDot" class="dot"></span><span id="apiStatus">API sin conectar</span><span>·</span><span id="clock"></span></div>
+  </header>
+
+  <section class="hero">
+    <div class="panel">
+      <span class="tag">PREDICTOR · PROTOTIPO 1.0</span>
+      <h2>Pronósticos basados en datos,<br>no solamente intuición.</h2>
+      <p>Consulta partidos, forma reciente, lesiones, alineaciones, cuotas y predicciones disponibles. El motor local calcula probabilidades 1X2 mediante una aproximación Poisson con los últimos resultados de cada equipo.</p>
+    </div>
+    <div class="panel api-box">
+      <h3>Conexión API-Football</h3>
+      <div class="field"><label for="apiKey">API KEY (x-apisports-key)</label><div class="key-row"><input id="apiKey" type="password" autocomplete="off" placeholder="Pega aquí tu API key"/><button id="toggleKey" class="btn secondary small" type="button">Ver</button></div></div>
+      <div style="display:flex;gap:9px;align-items:center;margin-top:10px;flex-wrap:wrap"><button id="connectBtn" class="btn small" type="button">Probar conexión</button><label style="font-size:10px;color:var(--muted);display:flex;gap:6px;align-items:center"><input id="rememberKey" type="checkbox"/> Recordar en este navegador</label></div>
+      <p class="note">Tu clave se usa desde este navegador. No la publiques ni compartas este archivo con la clave guardada.</p>
+      <div class="note"><a class="link" href="https://www.api-football.com/documentation-v3" target="_blank" rel="noopener">Documentación oficial ↗</a></div>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="field"><label for="dateFrom">DESDE</label><input id="dateFrom" type="date"/></div>
+    <div class="field"><label for="dateTo">HASTA</label><input id="dateTo" type="date"/></div>
+    <div class="field"><label for="searchLeague">COMPETICIÓN / EQUIPO</label><input id="searchLeague" type="search" placeholder="Buscar liga o equipo"/></div>
+    <div class="field"><label for="statusFilter">ESTADO</label><select id="statusFilter"><option value="all">Todos</option><option value="NS">Por jugar</option><option value="live">En vivo</option><option value="FT">Finalizados</option></select></div>
+    <button id="loadBtn" class="btn" type="button">Cargar partidos</button>
+  </section>
+
+  <div id="message" class="alert hidden" role="status"></div>
+  <section class="metrics">
+    <div class="metric"><div class="label">PARTIDOS ENCONTRADOS</div><div id="countMatches" class="value mono">—</div><div class="sub">En el rango seleccionado</div></div>
+    <div class="metric"><div class="label">COMPETICIONES</div><div id="countLeagues" class="value mono">—</div><div class="sub">Con partidos en la consulta</div></div>
+    <div class="metric"><div class="label">POR JUGAR</div><div id="countUpcoming" class="value mono">—</div><div class="sub">Disponibles para analizar</div></div>
+    <div class="metric"><div class="label">ANÁLISIS REALIZADOS</div><div id="countAnalyzed" class="value mono">0</div><div class="sub">En esta sesión</div></div>
+  </section>
+
+  <div class="section-head"><h3>Partidos encontrados</h3><span id="resultsLabel" class="muted" style="font-size:11px">Conecta tu API y carga un rango de fechas</span></div>
+  <section id="matches" class="matches"><div class="empty">Añade tu API key y pulsa <b>Probar conexión</b>. Después carga los partidos de las fechas que quieras.</div></section>
+
+  <section id="analysisSection" class="detail hidden">
+    <div class="section-head"><h3 id="analysisTitle">Análisis del encuentro</h3><button id="closeAnalysis" class="btn secondary small" type="button">Cerrar análisis</button></div>
+    <div id="analysisContent"></div>
+  </section>
+  <div class="footer">FOOTBALL INTELLIGENCE · Motor exploratorio. Las probabilidades son estimaciones, no garantías ni recomendaciones de apuesta.</div>
+</div>
+<script>
+(() => {
+  'use strict';
+  const API_BASE = 'https://v3.football.api-sports.io';
+  const TZ = 'America/Mexico_City';
+  const $ = (id) => document.getElementById(id);
+  const state = { fixtures: [], analyzed: 0, cache: new Map(), current: null };
+  const today = new Date();
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  $('dateFrom').value = iso(today);
+  const plus7 = new Date(today); plus7.setDate(today.getDate()+7); $('dateTo').value = iso(plus7);
+  $('clock').textContent = new Intl.DateTimeFormat('es-MX',{timeZone:TZ,dateStyle:'medium'}).format(new Date());
+  if (localStorage.getItem('fi_api_key')) { $('apiKey').value = localStorage.getItem('fi_api_key'); $('rememberKey').checked = true; }
+
+  function setStatus(ok, text) { $('apiDot').classList.toggle('on', !!ok); $('apiStatus').textContent = text; }
+  function showMessage(text, type='') { const el=$('message'); el.textContent=text; el.className='alert'+(type==='error'?' error':''); el.classList.remove('hidden'); }
+  function clearMessage(){ $('message').classList.add('hidden'); }
+  function key(){ return $('apiKey').value.trim(); }
+  async function api(path, params={}) {
+    if (!key()) throw new Error('Primero pega tu API key de API-Football.');
+    const u = new URL(API_BASE + path);
+    Object.entries(params).forEach(([k,v]) => { if(v!==undefined && v!==null && v!=='') u.searchParams.set(k,String(v)); });
+    const response = await fetch(u, {headers:{'x-apisports-key':key()}});
+    let data; try { data=await response.json(); } catch { throw new Error(`La API respondió HTTP ${response.status} sin JSON válido.`); }
+    if (!response.ok) throw new Error(data?.message || data?.errors?.token || `Error HTTP ${response.status}`);
+    if (data.errors && Object.keys(data.errors).length) throw new Error(Object.entries(data.errors).map(([k,v])=>`${k}: ${Array.isArray(v)?v.join(', '):v}`).join(' · '));
+    return data;
+  }
+  async function testConnection(){
+    clearMessage(); $('connectBtn').disabled=true; $('connectBtn').innerHTML='<span class="spinner"></span>Probando';
+    try { const data=await api('/status'); setStatus(true,'API conectada'); showMessage(`Conexión correcta. Plan: ${data.response?.subscription?.plan || 'consultado'} · Solicitudes restantes hoy: ${data.response?.requests?.remaining ?? 'No informado'}.`); if($('rememberKey').checked) localStorage.setItem('fi_api_key',key()); else localStorage.removeItem('fi_api_key'); }
+    catch(e){setStatus(false,'Error de conexión');showMessage(e.message+' Verifica tu clave, plan y permisos de API.', 'error');}
+    finally{$('connectBtn').disabled=false;$('connectBtn').textContent='Probar conexión';}
+  }
+  function fixtureStatus(f){ return f.fixture?.status?.short || ''; }
+  function statusLabel(s){ if(['NS','TBD','PST'].includes(s))return 'Por jugar'; if(['1H','HT','2H','ET','BT','P','LIVE'].includes(s))return 'En vivo'; if(['FT','AET','PEN'].includes(s))return 'Finalizado'; return s || 'Sin estado'; }
+  function matchTime(f){ try{return new Intl.DateTimeFormat('es-MX',{timeZone:TZ,dateStyle:'medium',timeStyle:'short'}).format(new Date(f.fixture.date));}catch{return f.fixture.date||'';} }
+  function safe(v){return String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function renderMatches(){
+    const q=$('searchLeague').value.trim().toLowerCase(); const sf=$('statusFilter').value;
+    const items=state.fixtures.filter(f=>{
+      const text=`${f.league?.name||''} ${f.teams?.home?.name||''} ${f.teams?.away?.name||''} ${f.league?.country||''}`.toLowerCase();
+      const s=fixtureStatus(f); const live=['1H','HT','2H','ET','BT','P','LIVE'].includes(s); const finished=['FT','AET','PEN'].includes(s); const upcoming=['NS','TBD','PST'].includes(s);
+      return (!q||text.includes(q))&&(sf==='all'||(sf==='NS'&&upcoming)||(sf==='live'&&live)||(sf==='FT'&&finished));
+    });
+    $('countMatches').textContent=items.length;
+    $('countLeagues').textContent=new Set(items.map(f=>f.league?.id).filter(Boolean)).size;
+    $('countUpcoming').textContent=items.filter(f=>['NS','TBD'].includes(fixtureStatus(f))).length;
+    $('resultsLabel').textContent=`Mostrando ${items.length} de ${state.fixtures.length} partidos`;
+    const root=$('matches');
+    if(!items.length){root.innerHTML='<div class="empty">No hay partidos con esos filtros. Prueba otro rango de fechas o limpia la búsqueda.</div>';return;}
+    root.innerHTML=items.map(f=>{
+      const s=fixtureStatus(f), played=['FT','AET','PEN'].includes(s), live=['1H','HT','2H','ET','BT','P','LIVE'].includes(s);
+      const score=played||live?`${f.goals?.home??0} : ${f.goals?.away??0}`:'VS';
+      const canAnalyze=['NS','TBD','PST'].includes(s);
+      return `<article class="match">
+        <div class="match-top"><span class="league">${safe(f.league?.country)} · ${safe(f.league?.name)}</span><span>${safe(statusLabel(s))}</span></div>
+        <div class="match-teams">
+          <div class="team"><img src="${safe(f.teams?.home?.logo)}" alt="" onerror="this.style.visibility='hidden'"><span>${safe(f.teams?.home?.name)}</span></div>
+          <div class="vs">${safe(score)}</div>
+          <div class="team away"><span>${safe(f.teams?.away?.name)}</span><img src="${safe(f.teams?.away?.logo)}" alt="" onerror="this.style.visibility='hidden'"></div>
+        </div>
+        <div class="match-foot"><span class="badge">${safe(matchTime(f))}</span><button class="btn small ${canAnalyze?'':'secondary'}" data-analyze="${f.fixture.id}" type="button">${canAnalyze?'Analizar partido':'Ver información'}</button></div>
+      </article>`;
+    }).join('');
+    root.querySelectorAll('[data-analyze]').forEach(b=>b.addEventListener('click',()=>analyzeMatch(Number(b.dataset.analyze))));
+  }
+  async function loadFixtures(){
+    clearMessage(); if(!$('dateFrom').value||!$('dateTo').value){showMessage('Selecciona las dos fechas.','error');return;}
+    if($('dateFrom').value>$('dateTo').value){showMessage('La fecha inicial no puede ser posterior a la fecha final.','error');return;}
+    const btn=$('loadBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Cargando partidos';
+    try{
+      const data=await api('/fixtures',{from:$('dateFrom').value,to:$('dateTo').value,timezone:TZ});
+      state.fixtures=data.response||[]; renderMatches(); setStatus(true,'API conectada');
+      showMessage(`Se recibieron ${state.fixtures.length} partidos. Algunas competiciones o estadísticas pueden no estar incluidas en tu plan.`);
+    }catch(e){showMessage(e.message,'error');setStatus(false,'Error consultando partidos');}
+    finally{btn.disabled=false;btn.textContent='Cargar partidos';}
+  }
+  async function cached(path,params){
+    const keyCache=path+'?'+new URLSearchParams(params).toString();
+    if(state.cache.has(keyCache))return state.cache.get(keyCache);
+    const promise=api(path,params).catch(e=>({__error:e.message})); state.cache.set(keyCache,promise); return promise;
+  }
+  function matchesForTeam(list, teamId){
+    return (list?.response||[]).filter(f=>['FT','AET','PEN'].includes(f.fixture?.status?.short)&&f.goals?.home!==null&&f.goals?.away!==null).map(f=>{
+      const home=f.teams?.home?.id===teamId; const gf=home?f.goals.home:f.goals.away; const ga=home?f.goals.away:f.goals.home;
+      return {date:f.fixture.date,gf:Number(gf||0),ga:Number(ga||0),result:gf>ga?'W':gf===ga?'D':'L',opponent:home?f.teams?.away?.name:f.teams?.home?.name,home};
+    }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  }
+  function avg(arr,field){return arr.length?arr.reduce((s,x)=>s+x[field],0)/arr.length:0;}
+  function poisson(lambda,k){let p=Math.exp(-lambda);for(let i=1;i<=k;i++)p*=lambda/i;return p;}
+  function buildModel(homeRecent,awayRecent){
+    const fallback=homeRecent.length>=3&&awayRecent.length>=3;
+    if(!fallback)return {ready:false,reason:'Se necesitan al menos 3 partidos recientes finalizados de cada equipo para estimar una distribución básica.'};
+    const homeGF=avg(homeRecent,'gf'),homeGA=avg(homeRecent,'ga'),awayGF=avg(awayRecent,'gf'),awayGA=avg(awayRecent,'ga');
+    // Estimación exploratoria basada en goles recientes; NO equivale a xG.
+    const lh=Math.max(.15,Math.min(3.8,((homeGF+awayGA)/2)+.18));
+    const la=Math.max(.15,Math.min(3.8,((awayGF+homeGA)/2)-.05));
+    const max=10, hp=Array.from({length:max+1},(_,k)=>poisson(lh,k)), ap=Array.from({length:max+1},(_,k)=>poisson(la,k));
+    const sumH=hp.reduce((a,b)=>a+b,0),sumA=ap.reduce((a,b)=>a+b,0); for(let i=0;i<=max;i++){hp[i]/=sumH;ap[i]/=sumA;}
+    let home=0,draw=0,away=0,o25=0,btts=0,best={p:0,h:0,a:0};
+    for(let h=0;h<=max;h++)for(let a=0;a<=max;a++){const p=hp[h]*ap[a];if(h>a)home+=p;else if(h===a)draw+=p;else away+=p;if(h+a>2.5)o25+=p;if(h>0&&a>0)btts+=p;if(p>best.p)best={p,h,a};}
+    const pct=x=>Math.round(x*1000)/10;
+    const hW=homeRecent.filter(x=>x.result==='W').length,dW=homeRecent.filter(x=>x.result==='D').length,lW=homeRecent.filter(x=>x.result==='L').length;
+    const aW=awayRecent.filter(x=>x.result==='W').length,dA=awayRecent.filter(x=>x.result==='D').length,lA=awayRecent.filter(x=>x.result==='L').length;
+    return {ready:true,lambdaHome:lh,lambdaAway:la,home:pct(home),draw:pct(draw),away:pct(away),over25:pct(o25),btts:pct(btts),best,homeRecent,awayRecent,homeRecord:`${hW}-${dW}-${lW}`,awayRecord:`${aW}-${dA}-${lA}`,homeGF,homeGA,awayGF,awayGA};
+  }
+  function renderRecent(title,arr){return `<div class="subpanel"><h4>${title}</h4>${arr.length?`<div class="list">${arr.slice(0,8).map(x=>`<div class="list-item"><span>${safe(new Date(x.date).toLocaleDateString('es-MX',{timeZone:TZ}))} · vs ${safe(x.opponent)}</span><span class="form-dot ${x.result}">${x.result}</span><b>${x.gf}-${x.ga}</b></div>`).join('')}</div>`:'<span class="muted">Sin datos recientes.</span>'}</div>`;}
+  function renderModel(m){
+    if(!m.ready)return `<div class="alert">${safe(m.reason)}</div>`;
+    return `<div class="subpanel"><h4>Pronóstico propio · Poisson exploratorio</h4><div class="prob-grid"><div class="prob"><strong style="color:var(--green)">${m.home}%</strong><span>Victoria local</span><div class="bar"><i style="width:${m.home}%"></i></div></div><div class="prob"><strong>${m.draw}%</strong><span>Empate</span><div class="bar"><i style="width:${m.draw}%"></i></div></div><div class="prob"><strong>${m.away}%</strong><span>Victoria visitante</span><div class="bar"><i style="width:${m.away}%"></i></div></div></div><div class="rows" style="margin-top:14px"><div class="data-row"><span>Goles esperados estimados local</span><b>${m.lambdaHome.toFixed(2)}</b></div><div class="data-row"><span>Goles esperados estimados visitante</span><b>${m.lambdaAway.toFixed(2)}</b></div><div class="data-row"><span>Marcador modal del modelo</span><b>${m.best.h} - ${m.best.a}</b></div><div class="data-row"><span>Más de 2.5 goles</span><b>${m.over25}%</b></div><div class="data-row"><span>Ambos equipos anotan</span><b>${m.btts}%</b></div><div class="data-row"><span>Forma últimos partidos (G-E-P)</span><b>${m.homeRecord} / ${m.awayRecord}</b></div></div><p class="note">Los goles esperados son promedios aproximados a partir de goles recientes; no son xG oficiales. La distribución no está calibrada ni entrenada con temporadas históricas.</p></div>`;
+  }
+  function parsePredictions(obj){
+    const p=obj?.response?.[0]?.predictions; const percent=p?.percent||{};
+    if(!p)return null;
+    const vals=[percent.home,percent.draw,percent.away].map(v=>{const n=parseFloat(String(v??'').replace('%',''));return Number.isFinite(n)?n:null;});
+    return {winner:p.winner?.name||'No definido',advice:p.advice||'No disponible',home:vals[0],draw:vals[1],away:vals[2],under:p.under_over||'No disponible'};
+  }
+  function renderProvider(p){if(!p)return '<div class="subpanel"><h4>Predicción del proveedor</h4><span class="muted">El endpoint no devolvió predicción para este partido o no está incluido en tu plan.</span></div>';return `<div class="subpanel"><h4>Predicción del proveedor · API-Football</h4><div class="rows"><div class="data-row"><span>Equipo señalado</span><b>${safe(p.winner)}</b></div><div class="data-row"><span>Consejo del proveedor</span><b>${safe(p.advice)}</b></div><div class="data-row"><span>Under / Over</span><b>${safe(p.under)}</b></div></div>${p.home!==null?`<div class="prob-grid" style="margin-top:12px"><div class="prob"><strong>${p.home}%</strong><span>Local</span></div><div class="prob"><strong>${p.draw}%</strong><span>Empate</span></div><div class="prob"><strong>${p.away}%</strong><span>Visitante</span></div></div>`:'<p class="note">No se devolvieron porcentajes 1X2 en esta respuesta.</p>'}<p class="note">Es una predicción externa independiente; no se mezcla automáticamente con el modelo propio.</p></div>`;}
+  function renderInjuries(obj){const arr=obj?.response||[];return `<div class="subpanel"><h4>Lesiones y sanciones (${arr.length})</h4>${arr.length?`<div class="list">${arr.slice(0,30).map(x=>`<div class="list-item"><span>${safe(x.player?.name)} · ${safe(x.team?.name)}</span><b>${safe(x.player?.reason||x.player?.type||'No especificado')}</b></div>`).join('')}</div>`:'<span class="muted">Sin registros devueltos. Puede significar que no hay bajas reportadas o que la competición no tiene cobertura.</span>'}</div>`;}
+  function renderLineups(obj){const arr=obj?.response||[];return `<div class="subpanel"><h4>Alineaciones</h4>${arr.length?arr.map(x=>`<div style="margin-bottom:10px"><b>${safe(x.team?.name)}</b> · ${safe(x.formation||'Formación no disponible')}<div class="note">Entrenador: ${safe(x.coach?.name||'No informado')} · Titulares: ${(x.startXI||[]).length}</div><div>${(x.startXI||[]).slice(0,11).map(p=>`<span class="pill">${safe(p.player?.name)}</span>`).join('')}</div></div>`).join(''):'<span class="muted">Aún no publicadas o no disponibles para esta competición. Suelen aparecer cerca del inicio del partido.</span>'}</div>`;}
+  function renderOdds(obj){const arr=obj?.response||[];if(!arr.length)return '<div class="subpanel"><h4>Cuotas</h4><span class="muted">No se devolvieron cuotas para este partido o tu plan no las incluye.</span></div>';return `<div class="subpanel"><h4>Cuotas disponibles</h4><div class="list">${arr.slice(0,5).map(book=>`<div><b>${safe(book.bookmaker?.name||'Casa de apuestas')}</b>${(book.bets||[]).slice(0,5).map(b=>`<div class="list-item"><span>${safe(b.name)}</span><span>${(b.values||[]).slice(0,8).map(v=>`${safe(v.value)}: <b>${safe(v.odd)}</b>`).join(' · ')}</span></div>`).join('')}</div>`).join('')}</div></div>`;}
+  function h2hMatches(obj){const arr=obj?.response||[];return `<div class="subpanel"><h4>Enfrentamientos directos (${arr.length})</h4>${arr.length?`<div class="list">${arr.slice(0,8).map(f=>`<div class="list-item"><span>${safe(new Date(f.fixture.date).toLocaleDateString('es-MX',{timeZone:TZ}))} · ${safe(f.teams.home.name)} vs ${safe(f.teams.away.name)}</span><b>${safe(f.goals.home)} - ${safe(f.goals.away)}</b></div>`).join('')}</div>`:'<span class="muted">Sin enfrentamientos devueltos.</span>'}</div>`;}
+  async function analyzeMatch(id){
+    const f=state.fixtures.find(x=>x.fixture.id===id); if(!f)return; state.current=f;
+    $('analysisSection').classList.remove('hidden'); $('analysisTitle').textContent=`${f.teams.home.name} vs ${f.teams.away.name}`;
+    $('analysisContent').innerHTML='<div class="panel"><span class="spinner"></span> Consultando forma reciente, predicción, bajas, alineaciones, cuotas e historial…</div>';
+    $('analysisSection').scrollIntoView({behavior:'smooth',block:'start'});
+    const hid=f.teams.home.id, aid=f.teams.away.id;
+    const requests=await Promise.all([
+      cached('/fixtures',{team:hid,last:10,timezone:TZ}), cached('/fixtures',{team:aid,last:10,timezone:TZ}),
+      cached('/predictions',{fixture:id}), cached('/injuries',{fixture:id}), cached('/fixtures/lineups',{fixture:id}),
+      cached('/odds',{fixture:id,page:1}), cached('/fixtures/headtohead',{h2h:`${hid}-${aid}`,last:10,timezone:TZ})
+    ]);
+    const [hr,ar,pred,inj,line,odds,h2h]=requests;
+    const homeRecent=matchesForTeam(hr,hid), awayRecent=matchesForTeam(ar,aid); const model=buildModel(homeRecent,awayRecent); const provider=parsePredictions(pred);
+    state.analyzed++; $('countAnalyzed').textContent=state.analyzed;
+    const errors=requests.filter(x=>x?.__error).map(x=>x.__error);
+    $('analysisContent').innerHTML=`<div class="panel"><div class="match-top"><span>${safe(f.league?.name)} · ${safe(f.league?.country)}</span><span>${safe(matchTime(f))}</span></div><div class="detail-grid" style="margin-top:13px">${renderModel(model)}${renderProvider(provider)}${renderRecent(`Forma reciente · ${safe(f.teams.home.name)}`,homeRecent)}${renderRecent(`Forma reciente · ${safe(f.teams.away.name)}`,awayRecent)}${renderInjuries(inj)}${renderLineups(line)}${renderOdds(odds)}${h2hMatches(h2h)}</div>${errors.length?`<div class="alert" style="margin-top:13px">Algunas consultas no estuvieron disponibles: ${safe([...new Set(errors)].join(' · '))}</div>`:''}<p class="note">ID del partido: ${id} · Consultas almacenadas en memoria durante esta sesión para evitar repetir llamadas.</p></div>`;
+  }
+  $('connectBtn').addEventListener('click',testConnection); $('loadBtn').addEventListener('click',loadFixtures);
+  $('searchLeague').addEventListener('input',renderMatches); $('statusFilter').addEventListener('change',renderMatches);
+  $('toggleKey').addEventListener('click',()=>{$('apiKey').type=$('apiKey').type==='password'?'text':'password';$('toggleKey').textContent=$('apiKey').type==='password'?'Ver':'Ocultar';});
+  $('closeAnalysis').addEventListener('click',()=>{$('analysisSection').classList.add('hidden');});
+  $('rememberKey').addEventListener('change',()=>{if($('rememberKey').checked&&key())localStorage.setItem('fi_api_key',key());else localStorage.removeItem('fi_api_key');});
+  $('apiKey').addEventListener('change',()=>{if($('rememberKey').checked&&key())localStorage.setItem('fi_api_key',key());});
+})();
+</script>
+</body>
+</html>
