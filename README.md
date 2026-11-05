@@ -1,26 +1,42 @@
 # Football Predictor AI
 
-Dashboard web para explorar partidos de fútbol y generar pronósticos estadísticos.
+Dashboard web en español para consultar eventos de fútbol y explorar pronósticos estadísticos.
 
-## Características
+## Fuentes de datos
 
-- Integración con API-Football mediante una API Key proporcionada por el usuario.
-- Consulta de fixtures, últimos partidos, estadísticas de equipos y datos disponibles según la cobertura del plan.
-- Análisis exploratorio de resultados 1X2, goles y ambos equipos anotan mediante un modelo Poisson.
-- Interfaz responsive en español.
+- **TheSportsDB (gratis):** utiliza automáticamente la clave pública `123`. No requiere registro. Permite consultar eventos por fecha, con límites de resultados por endpoint.
+- **API-Football:** proveedor alternativo que requiere una clave personal válida enviada en el encabezado `x-apisports-key`. La clave pública de TheSportsDB no funciona en API-Football.
+
+Selecciona el proveedor en el panel de conexión del dashboard.
+
+## Funcionalidades
+
+- Consulta de eventos por fechas y filtro local por competición/equipo.
+- Búsqueda de últimos resultados cuando el proveedor los ofrece.
+- Modelo Poisson exploratorio para 1X2, over 2.5 y ambos equipos anotan, únicamente cuando hay muestra suficiente.
+- Dashboard responsive.
 
 ## Uso
 
-1. Abre `index.html` en un servidor local (por ejemplo, Live Server o `python -m http.server 8000`).
-2. Obtén una API Key en [API-Football](https://www.api-football.com/).
-3. Introduce tu clave en el panel y prueba la conexión.
+1. Abre la página de GitHub Pages o sirve `index.html` desde un servidor local.
+2. Selecciona **TheSportsDB · Gratis, sin registro**.
+3. Pulsa **Probar conexión**.
+4. Selecciona un rango de fechas y pulsa **Cargar partidos**.
 
-> **Seguridad:** la versión estática utiliza la clave desde el navegador. No publiques una clave real ni despliegues esta configuración para usuarios públicos. Para producción, mueve las peticiones a un backend y guarda la clave en variables de entorno.
+Para usar API-Football, selecciona ese proveedor e introduce una clave válida obtenida en [API-Football](https://www.api-football.com/).
 
-## Limitaciones del modelo
+## Limitaciones importantes
 
-Las probabilidades mostradas son estimaciones exploratorias, no garantías de resultados ni recomendaciones de apuesta. La disponibilidad de xG, lesiones, alineaciones, cuotas y estadísticas depende de la liga, temporada y plan contratado. Los goles esperados aproximados calculados con resultados recientes no deben confundirse con xG oficiales.
+El plan gratuito de TheSportsDB limita la cantidad de resultados por endpoint y no ofrece el mismo nivel de cobertura que un proveedor de pago. No debe suponerse que se mostrarán todos los partidos de todas las ligas. La versión gratuita tampoco proporciona cuotas de apuestas ni un feed completo de lesiones.
 
-## Publicación con GitHub Pages
+El motor Poisson requiere al menos tres resultados recientes por equipo. Si la fuente no proporciona suficientes partidos, el dashboard muestra que no hay muestra suficiente en vez de inventar probabilidades. Los goles esperados derivados de marcadores no son xG oficiales.
 
-En GitHub, entra a **Settings → Pages**, selecciona **Deploy from a branch**, elige `main` y la carpeta `/ (root)`, y guarda los cambios. Cuando termine el despliegue, GitHub mostrará la URL pública del sitio.
+Las probabilidades son estimaciones exploratorias, no garantías de resultados ni recomendaciones de apuesta.
+
+## Seguridad
+
+TheSportsDB V1 utiliza la clave pública `123` en la URL. Para API-Football, esta versión estática usa la clave desde el navegador; no publiques una clave personal ni uses esta configuración para una aplicación pública. Para producción, mueve las peticiones a un backend y almacena secretos en variables de entorno.
+
+## GitHub Pages
+
+El sitio puede publicarse desde **Settings → Pages → Deploy from a branch → `main` → `/(root)`**.
